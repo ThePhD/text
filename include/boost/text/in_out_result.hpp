@@ -6,6 +6,7 @@
 #ifndef BOOST_TEXT_IN_OUT_RESULT_HPP
 #define BOOST_TEXT_IN_OUT_RESULT_HPP
 
+#include <boost/text/detail/attributes.hpp>
 
 namespace boost { namespace text {
 
@@ -14,8 +15,8 @@ namespace boost { namespace text {
     template<typename I, typename O>
     struct in_out_result
     {
-        [[no_unique_address]] I in;
-        [[no_unique_address]] O out;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS I in;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS O out;
     };
 
 }}

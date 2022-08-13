@@ -12,6 +12,8 @@
 #include <boost/text/in_out_result.hpp>
 #include <boost/text/view_adaptor.hpp>
 #include <boost/text/detail/normalization_data.hpp>
+#include <boost/text/detail/attributes.hpp>
+#include <boost/text/detail/attributes.hpp>
 
 #include <boost/stl_interfaces/view_interface.hpp>
 
@@ -209,7 +211,7 @@ namespace boost { namespace text {
     private:
         iterator first_;
         iterator it_;
-        [[no_unique_address]] sentinel last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS sentinel last_;
         std::size_t nonstarters_ = 0;
     };
 
@@ -281,7 +283,7 @@ namespace boost { namespace text {
 
     private:
         iterator first_;
-        [[no_unique_address]] sentinel last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS sentinel last_;
     };
 
     namespace detail {

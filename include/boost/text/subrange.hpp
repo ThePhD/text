@@ -8,6 +8,7 @@
 
 #include <boost/text/config.hpp>
 #include <boost/text/detail/algorithm.hpp>
+#include <boost/text/detail/attributes.hpp>
 
 #include <boost/stl_interfaces/view_interface.hpp>
 
@@ -33,11 +34,11 @@ namespace boost { namespace text {
 
         [[nodiscard]] constexpr subrange next(std::ptrdiff_t n = 1) const
         {
-            return subrange{std::next(first_), last_};
+            return subrange{std::next(first_, n), last_};
         }
         [[nodiscard]] constexpr subrange prev(std::ptrdiff_t n = 1) const
         {
-            return subrange{std::prev(first_), last_};
+            return subrange{std::prev(first_, n), last_};
         }
 
         constexpr subrange & advance(std::ptrdiff_t n)
@@ -59,7 +60,7 @@ namespace boost { namespace text {
 
     private:
         I first_;
-        [[no_unique_address]] S last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS S last_;
     };
 
 #if defined(__cpp_deduction_guides)

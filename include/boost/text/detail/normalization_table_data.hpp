@@ -45,7 +45,8 @@ namespace boost { namespace text { namespace detail {
 
         uint16_t get_norm16(int32_t c) const
         {
-            return ((c & 0xfffffc00) == 0xd800) ? inert : trie.fast_get(c);
+            return ((c & 0xfffffc00) == 0xd800) ? static_cast<uint16_t>(inert)
+                                                : trie.fast_get(c);
         }
 
         bool algorithmic_no_no(uint16_t norm16) const
@@ -65,19 +66,10 @@ namespace boost { namespace text { namespace detail {
         {
             return min_maybe_yes <= norm16;
         }
-        bool is_inert(uint16_t norm16) const
-        {
-            return norm16 == inert;
-        }
-        bool get_jamo_vt(uint16_t norm16) const
-        {
-            return norm16 == jamo_vt;
-        }
+        bool is_inert(uint16_t norm16) const { return norm16 == inert; }
+        bool get_jamo_vt(uint16_t norm16) const { return norm16 == jamo_vt; }
 
-        bool hangul_lv(uint16_t norm16) const
-        {
-            return norm16 == min_yes_no;
-        }
+        bool hangul_lv(uint16_t norm16) const { return norm16 == min_yes_no; }
         bool hangul_lvt(uint16_t norm16) const
         {
             return norm16 ==
@@ -128,8 +120,7 @@ namespace boost { namespace text { namespace detail {
             uint16_t const * list = get_mapping(norm16);
             return list + 1 + (*list & mapping_length_mask);
         }
-        uint16_t const *
-        get_compositions_list_for_maybe(uint16_t norm16) const
+        uint16_t const * get_compositions_list_for_maybe(uint16_t norm16) const
         {
             return maybe_yes_compositions +
                    ((norm16 - min_maybe_yes) >> offset_shift);
@@ -146,8 +137,7 @@ namespace boost { namespace text { namespace detail {
                    algorithmic_no_no(norm16);
         }
         template<typename Iter, typename Sentinel>
-        bool
-        comp_boundary_before_utf16(Iter first, Sentinel last) const
+        bool comp_boundary_before_utf16(Iter first, Sentinel last) const
         {
             if (first == last || *first < min_comp_no_maybe_cp)
                 return true;
@@ -156,8 +146,7 @@ namespace boost { namespace text { namespace detail {
             return norm16_comp_boundary_before(norm16);
         }
         template<typename CharIter, typename Sentinel>
-        bool
-        comp_boundary_before_utf8(CharIter first, Sentinel last) const
+        bool comp_boundary_before_utf8(CharIter first, Sentinel last) const
         {
             if (first == last)
                 return true;
@@ -183,8 +172,8 @@ namespace boost { namespace text { namespace detail {
             uint16_t norm16 = trie.fast_u8_prev(first, last);
             return norm16_comp_boundary_after(norm16, only_contiguous);
         }
-        bool norm16_comp_boundary_after(
-            uint16_t norm16, bool only_contiguous) const
+        bool
+        norm16_comp_boundary_after(uint16_t norm16, bool only_contiguous) const
         {
             return (norm16 & has_comp_boundary_after) != 0 &&
                    (!only_contiguous ||
@@ -205,16 +194,14 @@ namespace boost { namespace text { namespace detail {
                 return *--mapping;
             return 0;
         }
-        uint8_t
-        get_trail_cc_from_comp_yes_and_zero_cc(uint16_t norm16) const
+        uint8_t get_trail_cc_from_comp_yes_and_zero_cc(uint16_t norm16) const
         {
             if (norm16 <= min_yes_no)
                 return 0;
             return *get_mapping(norm16) >> 8;
         }
         template<typename Iter>
-        uint8_t
-        get_previous_trail_cc_utf16(Iter first, Iter last) const
+        uint8_t get_previous_trail_cc_utf16(Iter first, Iter last) const
         {
             if (first == last)
                 return 0;
@@ -230,8 +217,7 @@ namespace boost { namespace text { namespace detail {
             return get_fcd_16(cp);
         }
         template<typename CharIter>
-        uint8_t
-        get_previous_trail_cc_utf8(CharIter first, CharIter last) const
+        uint8_t get_previous_trail_cc_utf8(CharIter first, CharIter last) const
         {
             if (first == last)
                 return 0;

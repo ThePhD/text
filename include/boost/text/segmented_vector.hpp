@@ -55,8 +55,7 @@ namespace boost { namespace text {
         /** Default ctor.
 
             \post `size() == 0 && begin() == end()` */
-        segmented_vector() : ptr_()
-        {}
+        segmented_vector() : ptr_() {}
 
         explicit segmented_vector(size_type n) : ptr_() { resize(n); }
         explicit segmented_vector(size_type n, T const & x) : ptr_()
@@ -356,7 +355,7 @@ namespace boost { namespace text {
             allocation_note_t allocation_note)
         {
             if (!ptr_)
-                return seg_insertion{nullptr};
+                return seg_insertion{nullptr, {}};
 
             detail::found_leaf<T, Segment> found;
             if (0 < delta && at == end()) {
@@ -368,19 +367,19 @@ namespace boost { namespace text {
 
             for (auto node : found.path_) {
                 if (1 < node->refs_)
-                    return seg_insertion{nullptr};
+                    return seg_insertion{nullptr, {}};
             }
 
             if (1 < found.leaf_->get()->refs_)
-                return seg_insertion{nullptr};
+                return seg_insertion{nullptr, {}};
 
             if (found.leaf_->as_leaf()->which_ ==
                 detail::leaf_node_t<T, Segment>::which::seg) {
                 segment_type & v = const_cast<segment_type &>(
                     found.leaf_->as_leaf()->as_seg());
                 auto const inserted_size = v.size() + delta;
-                if (delta < 0 && v.size() < found.offset_ + -delta) {
-                    return seg_insertion{nullptr};
+                if (v.size() < found.offset_ + -delta) {
+                    return seg_insertion{nullptr, {}};
                 }
                 if ((0 < inserted_size && inserted_size <= v.capacity()) ||
                     (allocation_note == would_allocate &&
@@ -389,7 +388,7 @@ namespace boost { namespace text {
                 }
             }
 
-            return seg_insertion{nullptr};
+            return seg_insertion{nullptr, {}};
         }
 
         detail::node_ptr<T, Segment> ptr_;

@@ -110,8 +110,7 @@ namespace boost { namespace text {
 
     /** Returns 0 if the given sort keys are equal, a value < 0 if `lhs` is
         less than `rhs`, and a value > 0 otherwise. */
-    inline int
-    compare(text_sort_key const & lhs, text_sort_key const & rhs)
+    inline int compare(text_sort_key const & lhs, text_sort_key const & rhs)
     {
         return boost::text::lexicographical_compare_three_way(
             lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
@@ -127,8 +126,8 @@ namespace boost { namespace text {
         inline OutIter add_derived_elements(
             uint32_t cp,
             OutIter out,
-            detail::collation_trie_t const & trie,
-            collation_element const * collation_elements_first,
+            detail::collation_trie_t const &,
+            collation_element const *,
             LeadByteFunc const & lead_byte)
         {
             // Core Han Unified Ideographs
@@ -180,7 +179,8 @@ namespace boost { namespace text {
                   0x2B812, 0x2B813, 0x2B814, 0x2B815, 0x2B816, 0x2B817, 0x2B818,
                   0x2B819, 0x2B81A, 0x2B81B, 0x2B81C, 0x2B81D}};
 
-            double const spacing = (double)implicit_weights_spacing_times_ten / 10.0;
+            double const spacing =
+                (double)implicit_weights_spacing_times_ten / 10.0;
 
             for (auto seg : make_implicit_weights_segments()) {
                 if (seg.first_ <= cp && cp < seg.last_) {
@@ -232,10 +232,7 @@ namespace boost { namespace text {
             return out;
         }
 
-        inline bool ignorable(collation_element ce)
-        {
-            return ce.l1_ == 0;
-        }
+        inline bool ignorable(collation_element ce) { return ce.l1_ == 0; }
 
         template<typename CEIter>
         inline void s2_3_case_bits(CEIter first, CEIter last)
@@ -719,14 +716,14 @@ namespace boost { namespace text {
         auto
         s3(CEIter ces_first,
            CEIter ces_last,
-           int ces_size,
+           int,
            collation_strength strength,
            case_first case_1st,
            case_level case_lvl,
            l2_weight_order l2_order,
            CPIter cps_first,
            Sentinel cps_last,
-           int cps_size,
+           int,
            Container & bytes) -> detail::cp_iter_ret_t<void, CPIter>
         {
             level_sort_key_values_t l1;
@@ -772,7 +769,8 @@ namespace boost { namespace text {
                 if (l2_order == l2_weight_order::backward)
                     std::reverse(l2.begin(), l2.end());
                 auto packed_l2 = pack_words(l2);
-                detail::rle(packed_l2,
+                detail::rle(
+                    packed_l2,
                     min_secondary_byte,
                     common_secondary_byte,
                     max_secondary_byte);
@@ -780,7 +778,8 @@ namespace boost { namespace text {
                 detail::level_bytes_to_values(packed_l2, l2);
                 if (!l3.empty()) {
                     auto packed_l3 = detail::pack_words(l3);
-                    detail::rle(packed_l3,
+                    detail::rle(
+                        packed_l3,
                         min_tertiary_byte,
                         common_tertiary_byte,
                         max_tertiary_byte);
@@ -916,9 +915,9 @@ namespace boost { namespace text {
             variable_weighting weighting,
             l2_weight_order l2_order,
             collation_table const & table,
-            collation_trie_t const & trie,
-            collation_element const * ces_first,
-            LeadByteFunc const & lead_byte)
+            [[maybe_unused]] collation_trie_t const & trie,
+            collation_element const *,
+            LeadByteFunc const &)
         {
             auto const lhs = boost::text::as_utf32(first1, last1);
             auto const rhs = boost::text::as_utf32(first2, last2);
@@ -969,499 +968,504 @@ namespace boost { namespace text {
 
 }}
 
-namespace boost { namespace text { BOOST_TEXT_NAMESPACE_V1 {
+namespace boost { namespace text {
+    BOOST_TEXT_NAMESPACE_V1
+    {
 
 #ifdef BOOST_TEXT_DOXYGEN
 
-    /** Returns a collation sort key for the code points in `[first, last)`,
-        using the given collation table.  Any optional settings such as
-        `case_1st` will be honored, so long as they do not conflict with the
-        settings on the given table.
+        /** Returns a collation sort key for the code points in `[first, last)`,
+            using the given collation table.  Any optional settings such as
+            `case_1st` will be honored, so long as they do not conflict with the
+            settings on the given table.
 
-        Consider using one of the overloads that takes collation_flags
-        instead.
+            Consider using one of the overloads that takes collation_flags
+            instead.
 
-        \pre `[first, last)` is normalized NFD or FCC. */
-    template<code_point_iter I, std::sentinel_for<I> S>
-    text_sort_key collation_sort_key(
-        I first,
-        S last,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward);
+            \pre `[first, last)` is normalized NFD or FCC. */
+        template<code_point_iter I, std::sentinel_for<I> S>
+        text_sort_key collation_sort_key(
+            I first,
+            S last,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward);
 
-    /** Returns a collation sort key for the code points in `[first, last)`,
-        using the given collation table.  Any optional settings flags will be
-        honored, so long as they do not conflict with the settings on the
-        given table.
+        /** Returns a collation sort key for the code points in `[first, last)`,
+            using the given collation table.  Any optional settings flags will
+           be honored, so long as they do not conflict with the settings on the
+            given table.
 
-        \pre `[first, last)` is normalized NFD or FCC. */
-    template<code_point_iter I, std::sentinel_for<I> S>
-    text_sort_key collation_sort_key(
-        I first,
-        S last,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre `[first, last)` is normalized NFD or FCC. */
+        template<code_point_iter I, std::sentinel_for<I> S>
+        text_sort_key collation_sort_key(
+            I first,
+            S last,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
-    /** Returns a collation sort key for the code points in `r`, using the
-        given collation table.  Any optional settings flags will be honored,
-        so long as they do not conflict with the settings on the given table.
+        /** Returns a collation sort key for the code points in `r`, using the
+            given collation table.  Any optional settings flags will be honored,
+            so long as they do not conflict with the settings on the given
+           table.
 
-        \pre r is normalized NFD or FCC. */
-    template<code_point_range R>
-    text_sort_key collation_sort_key(
-        R && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre r is normalized NFD or FCC. */
+        template<code_point_range R>
+        text_sort_key collation_sort_key(
+            R && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
-    /** Returns a collation sort key for the graphemes in `r`, using the given
-        collation table.  Any optional settings flags will be honored, so long
-        as they do not conflict with the settings on the given table.
+        /** Returns a collation sort key for the graphemes in `r`, using the
+           given collation table.  Any optional settings flags will be honored,
+           so long as they do not conflict with the settings on the given table.
 
-        \pre r is normalized NFD or FCC. */
-    template<grapheme_range R>
-    text_sort_key collation_sort_key(
-        R && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre r is normalized NFD or FCC. */
+        template<grapheme_range R>
+        text_sort_key collation_sort_key(
+            R && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
-    /** Creates sort keys for `[first1, last1)` and `[first2, last2)`, then
-        returns the result of calling compare() on the keys. Any optional
-        settings such as `case_1st` will be honored, so long as they do not
-        conflict with the settings on the given table.
+        /** Creates sort keys for `[first1, last1)` and `[first2, last2)`, then
+            returns the result of calling compare() on the keys. Any optional
+            settings such as `case_1st` will be honored, so long as they do not
+            conflict with the settings on the given table.
 
-        Consider using one of the overloads that takes collation_flags
-        instead.
+            Consider using one of the overloads that takes collation_flags
+            instead.
 
-        \pre `[first1, last1)` is normalized NFD or FCC.
-        \pre `[first2, last2)` is normalized NFD or FCC. */
-    template<
-        code_point_iter I1,
-        std::sentinel_for<I1> S1,
-        code_point_iter I2,
-        std::sentinel_for<I2> S2>
-    int collate(
-        I1 first1,
-        S1 last1,
-        I2 first2,
-        S2 last2,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward);
+            \pre `[first1, last1)` is normalized NFD or FCC.
+            \pre `[first2, last2)` is normalized NFD or FCC. */
+        template<
+            code_point_iter I1,
+            std::sentinel_for<I1> S1,
+            code_point_iter I2,
+            std::sentinel_for<I2> S2>
+        int collate(
+            I1 first1,
+            S1 last1,
+            I2 first2,
+            S2 last2,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward);
 
-    /** Creates sort keys for `[first1, last1)` and `[first2, last2)`, then
-        returns the result of calling compare() on the keys.  Any optional
-        settings flags will be honored, so long as they do not conflict with
-        the settings on the given table.
+        /** Creates sort keys for `[first1, last1)` and `[first2, last2)`, then
+            returns the result of calling compare() on the keys.  Any optional
+            settings flags will be honored, so long as they do not conflict with
+            the settings on the given table.
 
-        \pre `[first1, last1)` is normalized NFD or FCC.
-        \pre `[first2, last2)` is normalized NFD or FCC. */
-    template<
-        code_point_iter I1,
-        std::sentinel_for<I1> S1,
-        code_point_iter I2,
-        std::sentinel_for<I2> S2>
-    int collate(
-        I1 first1,
-        S1 last1,
-        I2 first2,
-        S2 last2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre `[first1, last1)` is normalized NFD or FCC.
+            \pre `[first2, last2)` is normalized NFD or FCC. */
+        template<
+            code_point_iter I1,
+            std::sentinel_for<I1> S1,
+            code_point_iter I2,
+            std::sentinel_for<I2> S2>
+        int collate(
+            I1 first1,
+            S1 last1,
+            I2 first2,
+            S2 last2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
-    /** Creates sort keys for `r1` and `r2`, then returns the result of
-        calling compare() on the keys.  Any optional settings flags will be
-        honored, so long as they do not conflict with the settings on the
-        given table.
+        /** Creates sort keys for `r1` and `r2`, then returns the result of
+            calling compare() on the keys.  Any optional settings flags will be
+            honored, so long as they do not conflict with the settings on the
+            given table.
 
-        \pre `r1` is normalized NFD or FCC.
-        \pre `r2` is normalized NFD or FCC. */
-    template<code_point_range R1, code_point_range R2>
-    int collate(
-        R1 const & r1,
-        R2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre `r1` is normalized NFD or FCC.
+            \pre `r2` is normalized NFD or FCC. */
+        template<code_point_range R1, code_point_range R2>
+        int collate(
+            R1 const & r1,
+            R2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
-    /** Creates sort keys for `r1` and `r2`, then returns the result of
-        calling compare() on the keys.  Any optional settings flags will be
-        honored, so long as they do not conflict with the settings on the
-        given table.
+        /** Creates sort keys for `r1` and `r2`, then returns the result of
+            calling compare() on the keys.  Any optional settings flags will be
+            honored, so long as they do not conflict with the settings on the
+            given table.
 
-        \pre `r1` is normalized NFD or FCC.
-        \pre `r2` is normalized NFD or FCC. */
-    template<grapheme_range R1, grapheme_range R2>
-    int collate(
-        R1 const & r1,
-        R2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none);
+            \pre `r1` is normalized NFD or FCC.
+            \pre `r2` is normalized NFD or FCC. */
+        template<grapheme_range R1, grapheme_range R2>
+        int collate(
+            R1 const & r1,
+            R2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none);
 
 #else
-    
-    template<typename CPIter, typename Sentinel>
-    auto collation_sort_key(
-        CPIter first,
-        Sentinel last,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward)
-        -> detail::cp_iter_ret_t<text_sort_key, CPIter>
-    {
-        return detail::collation_sort_key(
-            first,
-            last,
-            strength,
-            case_1st,
-            case_lvl,
-            weighting,
-            l2_order,
-            table);
-    }
 
-    template<typename CPIter, typename Sentinel>
-    auto collation_sort_key(
-        CPIter first,
-        Sentinel last,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::cp_iter_ret_t<text_sort_key, CPIter>
-    {
-        return detail::collation_sort_key(
-            first,
-            last,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<typename CPIter, typename Sentinel>
+        auto collation_sort_key(
+            CPIter first,
+            Sentinel last,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward)
+            ->detail::cp_iter_ret_t<text_sort_key, CPIter>
+        {
+            return detail::collation_sort_key(
+                first,
+                last,
+                strength,
+                case_1st,
+                case_lvl,
+                weighting,
+                l2_order,
+                table);
+        }
 
-    template<typename CPRange>
-    auto collation_sort_key(
-        CPRange && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::cp_rng_alg_ret_t<text_sort_key, CPRange>
-    {
-        return detail::collation_sort_key(
-            detail::begin(r),
-            detail::end(r),
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<typename CPIter, typename Sentinel>
+        auto collation_sort_key(
+            CPIter first,
+            Sentinel last,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::cp_iter_ret_t<text_sort_key, CPIter>
+        {
+            return detail::collation_sort_key(
+                first,
+                last,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<typename GraphemeRange>
-    auto collation_sort_key(
-        GraphemeRange && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::graph_rng_alg_ret_t<text_sort_key, GraphemeRange>
-    {
-        return detail::collation_sort_key(
-            detail::begin(r).base(),
-            detail::end(r).base(),
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<typename CPRange>
+        auto collation_sort_key(
+            CPRange && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::cp_rng_alg_ret_t<text_sort_key, CPRange>
+        {
+            return detail::collation_sort_key(
+                detail::begin(r),
+                detail::end(r),
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<
-        typename CPIter1,
-        typename Sentinel1,
-        typename CPIter2,
-        typename Sentinel2>
-    auto collate(
-        CPIter1 first1,
-        Sentinel1 last1,
-        CPIter2 first2,
-        Sentinel2 last2,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward)
-        -> detail::cp_iter_ret_t<int, CPIter1>
-    {
-        return detail::collate(
-            first1,
-            last1,
-            first2,
-            last2,
-            strength,
-            case_1st,
-            case_lvl,
-            weighting,
-            l2_order,
-            table);
-    }
+        template<typename GraphemeRange>
+        auto collation_sort_key(
+            GraphemeRange && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::graph_rng_alg_ret_t<text_sort_key, GraphemeRange>
+        {
+            return detail::collation_sort_key(
+                detail::begin(r).base(),
+                detail::end(r).base(),
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<
-        typename CPIter1,
-        typename Sentinel1,
-        typename CPIter2,
-        typename Sentinel2>
-    auto collate(
-        CPIter1 first1,
-        Sentinel1 last1,
-        CPIter2 first2,
-        Sentinel2 last2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::cp_iter_ret_t<int, CPIter1>
-    {
-        return detail::collate(
-            first1,
-            last1,
-            first2,
-            last2,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<
+            typename CPIter1,
+            typename Sentinel1,
+            typename CPIter2,
+            typename Sentinel2>
+        auto collate(
+            CPIter1 first1,
+            Sentinel1 last1,
+            CPIter2 first2,
+            Sentinel2 last2,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward)
+            ->detail::cp_iter_ret_t<int, CPIter1>
+        {
+            return detail::collate(
+                first1,
+                last1,
+                first2,
+                last2,
+                strength,
+                case_1st,
+                case_lvl,
+                weighting,
+                l2_order,
+                table);
+        }
 
-    template<typename CPRange1, typename CPRange2>
-    auto collate(
-        CPRange1 const & r1,
-        CPRange2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::cp_rng_alg_ret_t<int, CPRange1>
-    {
-        return v1::collate(
-            detail::begin(r1),
-            detail::end(r1),
-            detail::begin(r2),
-            detail::end(r2),
-            table,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags));
-    }
+        template<
+            typename CPIter1,
+            typename Sentinel1,
+            typename CPIter2,
+            typename Sentinel2>
+        auto collate(
+            CPIter1 first1,
+            Sentinel1 last1,
+            CPIter2 first2,
+            Sentinel2 last2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::cp_iter_ret_t<int, CPIter1>
+        {
+            return detail::collate(
+                first1,
+                last1,
+                first2,
+                last2,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<typename GraphemeRange1, typename GraphemeRange2>
-    auto collate(
-        GraphemeRange1 const & r1,
-        GraphemeRange2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-        -> detail::graph_rng_alg_ret_t<int, GraphemeRange1>
-    {
-        return v1::collate(
-            detail::begin(r1).base(),
-            detail::end(r1).base(),
-            detail::begin(r2).base(),
-            detail::end(r2).base(),
-            table,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags));
-    }
+        template<typename CPRange1, typename CPRange2>
+        auto collate(
+            CPRange1 const & r1,
+            CPRange2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::cp_rng_alg_ret_t<int, CPRange1>
+        {
+            return v1::collate(
+                detail::begin(r1),
+                detail::end(r1),
+                detail::begin(r2),
+                detail::end(r2),
+                table,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags));
+        }
+
+        template<typename GraphemeRange1, typename GraphemeRange2>
+        auto collate(
+            GraphemeRange1 const & r1,
+            GraphemeRange2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+            ->detail::graph_rng_alg_ret_t<int, GraphemeRange1>
+        {
+            return v1::collate(
+                detail::begin(r1).base(),
+                detail::end(r1).base(),
+                detail::begin(r2).base(),
+                detail::end(r2).base(),
+                table,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags));
+        }
 
 #endif
-
-}}}
+    }
+}}
 
 #if BOOST_TEXT_USE_CONCEPTS
 
-namespace boost { namespace text { BOOST_TEXT_NAMESPACE_V2 {
-
-    template<code_point_iter I, std::sentinel_for<I> S>
-    text_sort_key collation_sort_key(
-        I first,
-        S last,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward)
+namespace boost { namespace text {
+    BOOST_TEXT_NAMESPACE_V2
     {
-        return detail::collation_sort_key(
-            first,
-            last,
-            strength,
-            case_1st,
-            case_lvl,
-            weighting,
-            l2_order,
-            table);
-    }
 
-    template<code_point_iter I, std::sentinel_for<I> S>
-    text_sort_key collation_sort_key(
-        I first,
-        S last,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return detail::collation_sort_key(
-            first,
-            last,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<code_point_iter I, std::sentinel_for<I> S>
+        text_sort_key collation_sort_key(
+            I first,
+            S last,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward)
+        {
+            return detail::collation_sort_key(
+                first,
+                last,
+                strength,
+                case_1st,
+                case_lvl,
+                weighting,
+                l2_order,
+                table);
+        }
 
-    template<code_point_range R>
-    text_sort_key collation_sort_key(
-        R && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return detail::collation_sort_key(
-            detail::begin(r),
-            detail::end(r),
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<code_point_iter I, std::sentinel_for<I> S>
+        text_sort_key collation_sort_key(
+            I first,
+            S last,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return detail::collation_sort_key(
+                first,
+                last,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<grapheme_range R>
-    text_sort_key collation_sort_key(
-        R && r,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return detail::collation_sort_key(
-            detail::begin(r).base(),
-            detail::end(r).base(),
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<code_point_range R>
+        text_sort_key collation_sort_key(
+            R && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return detail::collation_sort_key(
+                detail::begin(r),
+                detail::end(r),
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<
-        code_point_iter I1,
-        std::sentinel_for<I1> S1,
-        code_point_iter I2,
-        std::sentinel_for<I2> S2>
-    int collate(
-        I1 first1,
-        S1 last1,
-        I2 first2,
-        S2 last2,
-        collation_table const & table,
-        collation_strength strength = collation_strength::tertiary,
-        case_first case_1st = case_first::off,
-        case_level case_lvl = case_level::off,
-        variable_weighting weighting = variable_weighting::non_ignorable,
-        l2_weight_order l2_order = l2_weight_order::forward)
-    {
-        return detail::collate(
-            first1,
-            last1,
-            first2,
-            last2,
-            strength,
-            case_1st,
-            case_lvl,
-            weighting,
-            l2_order,
-            table);
-    }
+        template<grapheme_range R>
+        text_sort_key collation_sort_key(
+            R && r,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return detail::collation_sort_key(
+                detail::begin(r).base(),
+                detail::end(r).base(),
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<
-        code_point_iter I1,
-        std::sentinel_for<I1> S1,
-        code_point_iter I2,
-        std::sentinel_for<I2> S2>
-    int collate(
-        I1 first1,
-        S1 last1,
-        I2 first2,
-        S2 last2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return detail::collate(
-            first1,
-            last1,
-            first2,
-            last2,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags),
-            table);
-    }
+        template<
+            code_point_iter I1,
+            std::sentinel_for<I1> S1,
+            code_point_iter I2,
+            std::sentinel_for<I2> S2>
+        int collate(
+            I1 first1,
+            S1 last1,
+            I2 first2,
+            S2 last2,
+            collation_table const & table,
+            collation_strength strength = collation_strength::tertiary,
+            case_first case_1st = case_first::off,
+            case_level case_lvl = case_level::off,
+            variable_weighting weighting = variable_weighting::non_ignorable,
+            l2_weight_order l2_order = l2_weight_order::forward)
+        {
+            return detail::collate(
+                first1,
+                last1,
+                first2,
+                last2,
+                strength,
+                case_1st,
+                case_lvl,
+                weighting,
+                l2_order,
+                table);
+        }
 
-    template<code_point_range R1, code_point_range R2>
-    int collate(
-        R1 const & r1,
-        R2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return boost::text::collate(
-            detail::begin(r1),
-            detail::end(r1),
-            detail::begin(r2),
-            detail::end(r2),
-            table,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags));
-    }
+        template<
+            code_point_iter I1,
+            std::sentinel_for<I1> S1,
+            code_point_iter I2,
+            std::sentinel_for<I2> S2>
+        int collate(
+            I1 first1,
+            S1 last1,
+            I2 first2,
+            S2 last2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return detail::collate(
+                first1,
+                last1,
+                first2,
+                last2,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags),
+                table);
+        }
 
-    template<grapheme_range R1, grapheme_range R2>
-    int collate(
-        R1 const & r1,
-        R2 const & r2,
-        collation_table const & table,
-        collation_flags flags = collation_flags::none)
-    {
-        return boost::text::collate(
-            detail::begin(r1).base(),
-            detail::end(r1).base(),
-            detail::begin(r2).base(),
-            detail::end(r2).base(),
-            table,
-            detail::to_strength(flags),
-            detail::to_case_first(flags),
-            detail::to_case_level(flags),
-            detail::to_weighting(flags),
-            detail::to_l2_order(flags));
-    }
+        template<code_point_range R1, code_point_range R2>
+        int collate(
+            R1 const & r1,
+            R2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return boost::text::collate(
+                detail::begin(r1),
+                detail::end(r1),
+                detail::begin(r2),
+                detail::end(r2),
+                table,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags));
+        }
 
-}}}
+        template<grapheme_range R1, grapheme_range R2>
+        int collate(
+            R1 const & r1,
+            R2 const & r2,
+            collation_table const & table,
+            collation_flags flags = collation_flags::none)
+        {
+            return boost::text::collate(
+                detail::begin(r1).base(),
+                detail::end(r1).base(),
+                detail::begin(r2).base(),
+                detail::end(r2).base(),
+                table,
+                detail::to_strength(flags),
+                detail::to_case_first(flags),
+                detail::to_case_level(flags),
+                detail::to_weighting(flags),
+                detail::to_l2_order(flags));
+        }
+    }
+}}
 
 #endif
 
@@ -1571,17 +1575,18 @@ namespace boost { namespace text { namespace detail {
         }
 
         std::vector<uint32_t> bytes;
-        detail::s3(ces.begin(),
-           ces.end(),
-           ces.size(),
-           strength,
-           case_1st,
-           case_lvl,
-           l2_order,
-           initial_first,
-           last,
-           cps,
-           bytes);
+        detail::s3(
+            ces.begin(),
+            ces.end(),
+            ces.size(),
+            strength,
+            case_1st,
+            case_lvl,
+            l2_order,
+            initial_first,
+            last,
+            cps,
+            bytes);
 
         return text_sort_key(std::move(bytes));
     }
@@ -1674,8 +1679,7 @@ namespace boost { namespace text { namespace detail {
 
         if (l2_order == l2_weight_order::forward) {
             // This is std::ranges::mismatch(), but I can't use that yet.
-            for (; lhs_it != last1 && rhs_it != last2;
-                 ++lhs_it, ++rhs_it) {
+            for (; lhs_it != last1 && rhs_it != last2; ++lhs_it, ++rhs_it) {
                 if (*lhs_it != *rhs_it) {
                     // Back up to the start of the current CP.
                     while (lhs_it != first1) {
@@ -1819,85 +1823,82 @@ namespace boost { namespace text { namespace detail {
         container::small_vector<uint32_t, 64> cps;
         container::small_vector<Iter, 64> cp_end_iters;
 
-        auto get_primary =
-            [&](Iter & it,
-                Sentinel last,
-                uint32_t cp,
-                trie_match_t coll,
-                bool backed_up,
-                auto & primaries) {
-                if (backed_up)
-                    coll = trie.longest_subsequence(cp);
-                if (coll.match) {
-                    // S2.1
-                    if (!coll.leaf) {
-                        // Find the longest match, one CP at a time.
-                        auto next = it;
-                        cps.clear();
-                        cp_end_iters.clear();
+        auto get_primary = [&](Iter & it,
+                               Sentinel last,
+                               uint32_t cp,
+                               trie_match_t coll,
+                               bool backed_up,
+                               auto & primaries) {
+            if (backed_up)
+                coll = trie.longest_subsequence(cp);
+            if (coll.match) {
+                // S2.1
+                if (!coll.leaf) {
+                    // Find the longest match, one CP at a time.
+                    auto next = it;
+                    cps.clear();
+                    cp_end_iters.clear();
+                    cps.push_back(cp);
+                    cp_end_iters.push_back(next);
+                    auto last_match = coll;
+                    while (next != last) {
+                        auto temp = next;
+                        cp = detail::advance(temp, last);
+                        auto extended_coll = trie.extend_subsequence(coll, cp);
+                        if (extended_coll == coll)
+                            break;
+                        next = temp;
+                        coll = extended_coll;
+                        if (coll.match)
+                            last_match = coll;
                         cps.push_back(cp);
                         cp_end_iters.push_back(next);
-                        auto last_match = coll;
-                        while (next != last) {
-                            auto temp = next;
-                            cp = detail::advance(temp, last);
-                            auto extended_coll =
-                                trie.extend_subsequence(coll, cp);
-                            if (extended_coll == coll)
-                                break;
-                            next = temp;
-                            coll = extended_coll;
-                            if (coll.match)
-                                last_match = coll;
-                            cps.push_back(cp);
-                            cp_end_iters.push_back(next);
-                        }
-
-                        auto const last_match_cps_size = cps.size();
-
-                        // S2.1.1
-                        while (next != last) {
-                            cp = detail::advance(next, last);
-                            if (detail::ccc(cp) == 0)
-                                break;
-                            cps.push_back(cp);
-                            cp_end_iters.push_back(next);
-                        }
-
-#if BOOST_TEXT_INSTRUMENT_COLLATE_IMPL
-                        auto const & collation_value = *trie[coll];
-                        std::cout << "coll.match, coll_value="
-                                  << collation_value.first() << " "
-                                  << collation_value.last()
-                                  << " getting CEs for: ";
-                        for (auto cp : cps) {
-                            std::cout << "0x" << std::hex << cp << " ";
-                        }
-                        std::cout << std::dec << "\n";
-#endif
-
-                        // S2.1.2
-                        auto cps_it = cps.begin() + last_match_cps_size;
-                        coll =
-                            detail::s2_1_2(cps_it, cps.end(), coll, trie, true);
-                        it = cp_end_iters[cps_it - cps.begin() - 1];
                     }
 
-                    auto const & collation_value = *trie[coll];
+                    auto const last_match_cps_size = cps.size();
+
+                    // S2.1.1
+                    while (next != last) {
+                        cp = detail::advance(next, last);
+                        if (detail::ccc(cp) == 0)
+                            break;
+                        cps.push_back(cp);
+                        cp_end_iters.push_back(next);
+                    }
+
 #if BOOST_TEXT_INSTRUMENT_COLLATE_IMPL
-                    std::cout << "final coll.match coll.size=" << coll.size
-                              << " coll.value=" << collation_value.first()
-                              << " " << collation_value.last() << "\n";
+                    auto const & collation_value = *trie[coll];
+                    std::cout
+                        << "coll.match, coll_value=" << collation_value.first()
+                        << " " << collation_value.last()
+                        << " getting CEs for: ";
+                    for (auto cp : cps) {
+                        std::cout << "0x" << std::hex << cp << " ";
+                    }
+                    std::cout << std::dec << "\n";
 #endif
 
-                    return unshifted_primary_seq(
-                        collation_value.begin(ces_first),
-                        collation_value.end(ces_first),
-                        primaries);
-                } else {
-                    return unshifted_derived_primary(cp, primaries);
+                    // S2.1.2
+                    auto cps_it = cps.begin() + last_match_cps_size;
+                    coll = detail::s2_1_2(cps_it, cps.end(), coll, trie, true);
+                    it = cp_end_iters[cps_it - cps.begin() - 1];
                 }
-            };
+
+                auto const & collation_value = *trie[coll];
+#if BOOST_TEXT_INSTRUMENT_COLLATE_IMPL
+                std::cout << "final coll.match coll.size=" << coll.size
+                          << " coll.value=" << collation_value.first() << " "
+                          << collation_value.last() << "\n";
+#endif
+
+                return unshifted_primary_seq(
+                    collation_value.begin(ces_first),
+                    collation_value.end(ces_first),
+                    primaries);
+            } else {
+                return unshifted_derived_primary(cp, primaries);
+            }
+        };
 
         // Look for a non-ignorable primary, or the end of each sequence.
 
@@ -1942,8 +1943,8 @@ namespace boost { namespace text { namespace detail {
             }
 
             if ((l_prim.coll_.leaf || lhs_it == last1) &&
-                (r_prim.coll_.leaf || rhs_it == last2) &&
-                l_primaries.empty() && r_primaries.empty()) {
+                (r_prim.coll_.leaf || rhs_it == last2) && l_primaries.empty() &&
+                r_primaries.empty()) {
                 uint32_t l_primary = l_prim.derived_primary_
                                          ? l_prim.derived_primary_ >> 24
                                          : l_prim.lead_primary_;
@@ -2154,10 +2155,8 @@ namespace boost { namespace text { namespace detail {
         if (strength == collation_strength::primary)
             return 0;
 
-        auto const lhs =
-            boost::text::as_utf32(lhs_identical_prefix, last1);
-        auto const rhs =
-            boost::text::as_utf32(rhs_identical_prefix, last2);
+        auto const lhs = boost::text::as_utf32(lhs_identical_prefix, last1);
+        auto const rhs = boost::text::as_utf32(rhs_identical_prefix, last2);
         text_sort_key const lhs_sk = detail::collation_sort_key(
             lhs.begin(),
             lhs.end(),

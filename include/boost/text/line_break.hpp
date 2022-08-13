@@ -10,6 +10,7 @@
 #include <boost/text/grapheme_view.hpp>
 #include <boost/text/view_adaptor.hpp>
 #include <boost/text/detail/breaks_impl.hpp>
+#include <boost/text/detail/attributes.hpp>
 
 #include <boost/assert.hpp>
 #include <boost/optional.hpp>
@@ -1954,7 +1955,7 @@ constexpr std::array<std::array<bool, 42>, 42> line_breaks = {{
             next_allowed_line_break_within_extent_callable<Extent, CPExtentFunc>
                 next_;
         iterator first_;
-        [[no_unique_address]] sentinel last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS sentinel last_;
     };
 
     namespace detail {
@@ -2196,7 +2197,7 @@ constexpr std::array<std::array<bool, 42>, 42> line_breaks = {{
 
     private:
         iterator first_;
-        [[no_unique_address]] sentinel last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS sentinel last_;
     };
 
     namespace detail {

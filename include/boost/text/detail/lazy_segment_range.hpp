@@ -7,6 +7,7 @@
 #define BOOST_TEXT_LAZY_SEGMENT_RANGE_HPP
 
 #include <boost/text/transcode_view.hpp>
+#include <boost/text/detail/attributes.hpp>
 
 #include <boost/stl_interfaces/iterator_interface.hpp>
 
@@ -28,7 +29,7 @@ namespace boost { namespace text { namespace detail {
         NextFunc * next_func_;
         CPIter prev_;
         CPIter it_;
-        [[no_unique_address]] Sentinel last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS Sentinel last_;
 
     public:
         const_lazy_segment_iterator() :

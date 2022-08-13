@@ -7,6 +7,7 @@
 #define BOOST_TEXT_DETAIL_UNPACK_HPP
 
 #include <boost/text/transcode_iterator.hpp>
+#include <boost/text/detail/attributes.hpp>
 
 
 namespace boost { namespace text { namespace detail {
@@ -30,9 +31,9 @@ namespace boost { namespace text { namespace detail {
             return then_(Iterator(first_, it, last_));
         }
 
-        [[no_unique_address]] I first_;
-        [[no_unique_address]] S last_;
-        [[no_unique_address]] Then then_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS I first_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS S last_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS Then then_;
     };
     template<typename Iterator, typename I, typename S, typename Then>
     auto repacker(I first, S last, Then then)
@@ -55,7 +56,7 @@ namespace boost { namespace text { namespace detail {
     struct tagged_range
     {
         Iter f_;
-        [[no_unique_address]] Sentinel l_;
+        BOOST_TEXT_NO_UNIQUE_ADDRESS Sentinel l_;
         Tag tag_;
         Repack repack_;
     };
