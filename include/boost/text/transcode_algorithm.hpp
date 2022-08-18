@@ -179,7 +179,7 @@ namespace boost { namespace text {
 
         template<typename OutIter>
         void finalize_sse_out(
-            OutIter & out, std::array<int32_t, 16> const &, int incr)
+            OutIter & out, std::array<int32_t, 16> const & tmp, int incr)
         {
             out = std::copy(tmp.begin(), tmp.begin() + incr, out);
         }
