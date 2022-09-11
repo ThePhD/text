@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(boost_text LANGUAGES CXX)
 
+include(FetchContent)
+
 # # # Top-Level Directories
 # Check if this is the top-level project or not
 if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
@@ -10,9 +12,11 @@ else()
 	set(BOOST_TEXT_IS_TOP_LEVEL_PROJECT NO)
 endif()
 
+option(BOOST_TEXT_INSTALL "Whether to add the typical Boost::text files to the install." OFF)
 option(BOOST_TEXT_EXAMPLES "Whether the examples should be included as part of the configuration." OFF)
 option(BOOST_TEXT_PERF "Whether the perf/benchmarks should be included as part of the configuration." OFF)
 option(BOOST_TEXT_TESTS "Whether the tests should be included as part of the configuration." OFF)
+option(BOOST_TEXT_FETCH_BOOST "Whether or not the entirety of the Boost dependency should be fetched directly with FetchContent." ON)
 
 if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     ################################################## 
@@ -72,10 +76,113 @@ if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     if (BUILD_EDITOR)
         set(boost_components filesystem system)
     endif()
-
-    include(dependencies)
 endif()
 
+if (BOOST_TEXT_FETCH_BOOST)
+    if (BOOST_ROOT)
+        find_package(Boost REQUIRED)
+    else()
+        ################################################## 
+        # Boost dependency
+        ################################################## 
+        set(boost_lib_deps
+            fusion
+            algorithm
+            align
+            array
+            atomic
+            bind
+            concept_check
+            container
+            container_hash
+            endian
+            exception
+            function
+            function_types
+            integer
+            intrusive
+            io
+            iterator
+            move
+            mp11
+            mpl
+            optional
+            preprocessor
+            range
+            smart_ptr
+            static_assert
+            stl_interfaces
+            type_index
+            type_traits
+            throw_exception
+            utility
+            winapi
+            unordered
+            typeof
+            conversion
+            test
+            tuple
+            regex
+            assert
+            config
+            core
+            predef
+            detail
+        ) 
+        set(BOOST_INCLUDE_LIBRARIES "${boost_lib_deps}" CACHE INTERNAL "") 
+        FetchContent_Declare(
+            boost
+            GIT_REPOSITORY https://github.com/boostorg/boost.git
+            GIT_SHALLOW true
+            GIT_SUBMODULES
+                libs/fusion
+                libs/algorithm
+                libs/align
+                libs/array
+                libs/atomic
+                libs/bind
+                libs/concept_check
+                libs/container
+                libs/container_hash
+                libs/endian
+                libs/exception
+                libs/function
+                libs/function_types
+                libs/integer
+                libs/intrusive
+                libs/io
+                libs/iterator
+                libs/move
+                libs/mp11
+                libs/mpl
+                libs/numeric
+                libs/optional
+                libs/preprocessor
+                libs/range
+                libs/smart_ptr
+                libs/static_assert
+                libs/stl_interfaces
+                libs/type_index
+                libs/type_traits
+                libs/throw_exception
+                libs/utility
+                libs/winapi
+                libs/unordered
+                libs/typeof
+                libs/conversion
+                libs/test
+                libs/tuple
+                libs/regex
+                libs/assert
+                libs/config
+                libs/core
+                libs/predef
+                libs/detail
+                tools/cmake
+        )
+        FetchContent_MakeAvailable(boost)
+    endif()
+endif()
 
 ##################################################
 # text library
@@ -94,12 +201,20 @@ add_library(text
     src/case_mapping.cpp
     src/data_versions.cpp
 )
-add_library(boost::text ALIAS text)
+add_library(Boost::text ALIAS text)
 target_include_directories(text
   PUBLIC
   $<INSTALL_INTERFACE:include>
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>)
-target_include_directories(text PRIVATE ${Boost_INCLUDE_DIR})
+if (Boost_INCLUDE_DIRS)
+    target_include_directories(text
+        PUBLIC
+        ${Boost_INCLUDE_DIRS})
+else()
+    target_link_libraries(text
+        PUBLIC
+        Boost::boost)
+endif()
 set_property(TARGET text PROPERTY CXX_STANDARD ${CXX_STD})
 target_compile_options(text PRIVATE -DBOOST_TEXT_SOURCE)
 if (link_flags)
@@ -110,22 +225,24 @@ if (NOT MSVC)
     target_compile_options(text PRIVATE -Wall)
 endif ()
 
-install(TARGETS text
-  EXPORT text_export
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib)
+if (BOOST_TEXT_INSTALL)
+    install(TARGETS text
+        EXPORT text_export
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
 
-install(EXPORT text_export
-  FILE text-targets.cmake
-  NAMESPACE Boost::
-  DESTINATION lib/cmake/text)
+    install(EXPORT text_export
+        FILE text-targets.cmake
+        NAMESPACE Boost::
+        DESTINATION lib/cmake/text)
 
-install(FILES
-  ${CMAKE_CURRENT_SOURCE_DIR}/cmake/text-config.cmake
-  DESTINATION "lib/cmake/text")
+    install(FILES
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/text-config.cmake
+        DESTINATION "lib/cmake/text")
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/boost
-  DESTINATION "include")
+    install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/boost
+        DESTINATION "include")
+endif()
 
 # See above for editor example.
 if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
@@ -133,11 +250,11 @@ if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     # Boost from Github repos.  However, we don't want a permanent text ->
     # boost_clone dependency, so make this CMakeLists.txt file dirty by touching
     # it, after boost_clone finishes.
-    if (TARGET boost_clone)
-      add_dependencies(text boost_clone)
-      add_custom_command(TARGET boost_clone POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_LIST_FILE})
-    endif()
+    #if (TARGET boost_clone)
+    #  add_dependencies(text boost_clone)
+    #  add_custom_command(TARGET boost_clone POST_BUILD
+    #    COMMAND ${CMAKE_COMMAND} -E touch ${CMAKE_CURRENT_LIST_FILE})
+    #endif()
     
     ##################################################
     # Tests and examples
