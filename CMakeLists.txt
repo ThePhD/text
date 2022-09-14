@@ -22,9 +22,8 @@ if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     ################################################## 
     # C++ standard version selection
     ################################################## 
-    set(CXX_STD 14 CACHE STRING "Set to 14, 17, etc., to enable C++14, C++17, etc.")
-    message("-- Using -std=c++${CXX_STD}")
-
+    set(CXX_STD 17 CACHE STRING "Set to 14, 17, etc., to enable C++14, C++17, etc.")
+    set(CMAKE_CXX_STANDARD ${CXX_STD})    
 
     ##################################################
     # Sanitizers

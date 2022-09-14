@@ -12,71 +12,87 @@ function(fetch_boost)
   if (NOT BOOST_BRANCH)
     set(BOOST_BRANCH master)
   endif()
-  set(boost_root_clone_dir ${CMAKE_BINARY_DIR}/_deps/boost_clone-src)
-  add_custom_target(
-    boost_root_clone
-    git clone --depth 1 -b ${BOOST_BRANCH}
-      https://github.com/boostorg/boost.git ${boost_root_clone_dir}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
   if (WIN32)
     set(bootstrap_cmd ./bootstrap.bat)
   else()
     set(bootstrap_cmd ./bootstrap.sh)
   endif()
-  add_custom_target(
-    boost_clone
-    COMMAND git submodule init libs/test
-    COMMAND git submodule init libs/algorithm
-    COMMAND git submodule init libs/align
-    COMMAND git submodule init libs/array
-    COMMAND git submodule init libs/atomic
-    COMMAND git submodule init libs/bind
-    COMMAND git submodule init libs/concept_check
-    COMMAND git submodule init libs/container
-    COMMAND git submodule init libs/container_hash
-    COMMAND git submodule init libs/endian
-    COMMAND git submodule init libs/exception
-    COMMAND git submodule init libs/filesystem
-    COMMAND git submodule init libs/function
-    COMMAND git submodule init libs/integer
-    COMMAND git submodule init libs/intrusive
-    COMMAND git submodule init libs/io
-    COMMAND git submodule init libs/iterator
-    COMMAND git submodule init libs/move
-    COMMAND git submodule init libs/mpl
-    COMMAND git submodule init libs/numeric
-    COMMAND git submodule init libs/optional
-    COMMAND git submodule init libs/preprocessor
-    COMMAND git submodule init libs/range
-    COMMAND git submodule init libs/smart_ptr
-    COMMAND git submodule init libs/static_assert
-    COMMAND git submodule init libs/stl_interfaces
-    COMMAND git submodule init libs/system
-    COMMAND git submodule init libs/type_index
-    COMMAND git submodule init libs/type_traits
-    COMMAND git submodule init libs/throw_exception
-    COMMAND git submodule init libs/utility
-    COMMAND git submodule init libs/winapi
-    COMMAND git submodule init libs/assert
-    COMMAND git submodule init libs/config
-    COMMAND git submodule init libs/core
-    COMMAND git submodule init libs/predef
-    COMMAND git submodule init libs/detail
-    COMMAND git submodule init tools/build
-    COMMAND git submodule init libs/headers
-    COMMAND git submodule init tools/boost_install
-    COMMAND git submodule update --jobs 3 --depth 100
+  FetchContent_Declare(
+    boost
+    GIT_REPOSITORY https://github.com/boostorg/boost.git
+    GIT_SHALLOW true
+    GIT_SUBMODULES
+        libs/algorithm
+        libs/align
+        libs/array
+        libs/assert
+        libs/atomic
+        libs/bind
+        libs/config
+        libs/concept_check
+        libs/container
+        libs/container_hash
+        libs/conversion
+        libs/core
+        libs/detail
+        libs/endian
+        libs/exception
+        libs/function
+        libs/function_types
+        libs/fusion
+        libs/headers
+        libs/integer
+        libs/intrusive
+        libs/io
+        libs/iterator
+        libs/move
+        libs/mp11
+        libs/mpl
+        libs/numeric
+        libs/optional
+        libs/predef
+        libs/preprocessor
+        libs/range
+        libs/regex
+        libs/smart_ptr
+        libs/static_assert
+        libs/stl_interfaces
+        libs/system
+        libs/typeof
+        libs/test
+        libs/tuple
+        libs/type_index
+        libs/type_traits
+        libs/throw_exception
+        libs/utility
+        libs/unordered
+        libs/winapi
+        tools/cmake
+        tools/build
+        tools/boost_install
+  )
+  FetchContent_GetProperties(boost)
+  if(NOT boost_POPULATED)
+    # Fetch the content using previously declared details
+    FetchContent_Populate(boost)
+    # do NOT add-subdirectory it at all.
+  endif()
+  set(boost_fetch_last_build ${boost_SOURCE_DIR}/stage/.cmakelastbuild)
+  add_custom_command(OUTPUT ${boost_fetch_last_build}
+    COMMAND git submodule update --depth 1
     COMMAND ${bootstrap_cmd}
     COMMAND ./b2 headers
     COMMAND ./b2
-    WORKING_DIRECTORY ${boost_root_clone_dir}
-    DEPENDS boost_root_clone)
+    COMMAND ${CMAKE_COMMAND} -E touch "${boost_fetch_last_build}"
+    WORKING_DIRECTORY ${boost_SOURCE_DIR})
+  add_custom_target(boost_clone_build
+    DEPENDS ${boost_fetch_last_build})
   add_library(boost INTERFACE)
   add_library(Boost::boost ALIAS boost)
-  add_dependencies(boost boost_clone)
-  target_include_directories(boost INTERFACE ${boost_root_clone_dir})
-  set(Boost_INCLUDE_DIR ${boost_root_clone_dir})
-  target_link_directories(boost INTERFACE ${boost_root_clone_dir}/stage/lib)
+  add_dependencies(boost boost_clone_build)
+  target_include_directories(boost INTERFACE ${boost_SOURCE_DIR})
+  set(Boost_INCLUDE_DIR ${boost_SOURCE_DIR})
+  target_link_directories(boost INTERFACE ${boost_SOURCE_DIR}/stage/lib)
 endfunction()
 
 if (BOOST_TEXT_FETCH_BOOST)

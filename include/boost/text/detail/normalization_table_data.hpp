@@ -191,7 +191,7 @@ namespace boost { namespace text { namespace detail {
         {
             uint16_t const * mapping = get_mapping(norm16);
             if (*mapping & mapping_has_ccc_lccc_word)
-                return *--mapping;
+                return static_cast<uint8_t>(*--mapping);
             return 0;
         }
         uint8_t get_trail_cc_from_comp_yes_and_zero_cc(uint16_t norm16) const

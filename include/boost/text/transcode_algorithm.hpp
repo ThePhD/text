@@ -167,7 +167,7 @@ namespace boost { namespace text {
         }
 
         inline int32_t * sse_out_ptr(
-            int32_t * out, [[maybe_unused]] std::array<int32_t, 16> & tmp)
+            int32_t * out, std::array<int32_t, 16> &)
         {
             return out;
         }

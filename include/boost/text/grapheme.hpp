@@ -86,7 +86,7 @@ namespace boost { namespace text {
 
         /** Returns the number of code points contained in *this.  This is an
             O(N) operation. */
-        int distance() const { return std::distance(begin(), end()); }
+        int distance() const { return static_cast<int>(std::distance(begin(), end())); }
 
         const_iterator begin() const
         {
@@ -120,7 +120,7 @@ namespace boost { namespace text {
 
         friend int storage_code_units(grapheme const & g)
         {
-            return g.chars_.size();
+            return static_cast<int>(g.chars_.size());
         }
 
     private:
