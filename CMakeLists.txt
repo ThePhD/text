@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
+cmake_policy(VERSION 3.5)
+cmake_policy(SET CMP0077 NEW)
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 project(boost_text LANGUAGES CXX)
 
@@ -16,7 +18,7 @@ option(BOOST_TEXT_INSTALL "Whether to add the typical Boost::text files to the i
 option(BOOST_TEXT_EXAMPLES "Whether the examples should be included as part of the configuration." OFF)
 option(BOOST_TEXT_PERF "Whether the perf/benchmarks should be included as part of the configuration." OFF)
 option(BOOST_TEXT_TESTS "Whether the tests should be included as part of the configuration." OFF)
-option(BOOST_TEXT_FETCH_BOOST "Whether or not the entirety of the Boost dependency should be fetched directly with FetchContent." ON)
+option(BOOST_TEXT_FETCH_BOOST "Whether or not the entirety of the Boost dependency should be fetched directly with FetchContent." OFF)
 
 if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     ################################################## 
@@ -108,7 +110,8 @@ if (Boost_INCLUDE_DIRS)
     target_include_directories(text
         PUBLIC
         ${Boost_INCLUDE_DIRS})
-else()
+endif()
+if (TARGET Boost::boost)
     target_link_libraries(text
         PUBLIC
         Boost::boost)

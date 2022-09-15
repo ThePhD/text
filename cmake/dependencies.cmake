@@ -72,11 +72,16 @@ function(fetch_boost)
         tools/boost_install
   )
   FetchContent_GetProperties(boost)
-  if(NOT boost_POPULATED)
+  if (NOT boost_POPULATED)
     # Fetch the content using previously declared details
     FetchContent_Populate(boost)
     # do NOT add-subdirectory it at all.
   endif()
+  file(GLOB_RECURSE boost_header_files
+    LIST_DIRECTORIES OFF
+    CONFIGURE_DEPENDS
+    *.hpp *.h *.hxx "*.h++" *.cpp *.c *.cxx "*.c++"
+  )
   set(boost_fetch_last_build ${boost_SOURCE_DIR}/stage/.cmakelastbuild)
   add_custom_command(OUTPUT ${boost_fetch_last_build}
     COMMAND git submodule update --depth 1
@@ -86,16 +91,18 @@ function(fetch_boost)
     COMMAND ${CMAKE_COMMAND} -E touch "${boost_fetch_last_build}"
     WORKING_DIRECTORY ${boost_SOURCE_DIR})
   add_custom_target(boost_clone_build
-    DEPENDS ${boost_fetch_last_build})
+    DEPENDS ${boost_fetch_last_build} ${boost_header_files})
   add_library(boost INTERFACE)
   add_library(Boost::boost ALIAS boost)
   add_dependencies(boost boost_clone_build)
   target_include_directories(boost INTERFACE ${boost_SOURCE_DIR})
-  set(Boost_INCLUDE_DIR ${boost_SOURCE_DIR})
+  set(Boost_INCLUDE_DIR ${boost_SOURCE_DIR} PARENT_SCOPE)
+  set(Boost_INCLUDE_DIRS ${boost_SOURCE_DIR} PARENT_SCOPE)
   target_link_directories(boost INTERFACE ${boost_SOURCE_DIR}/stage/lib)
 endfunction()
 
 if (BOOST_TEXT_FETCH_BOOST)
+  message(STATUS "-- Fetching Boost...")
   fetch_boost()
 else()
   set(boost_lib_deps
@@ -143,15 +150,18 @@ else()
     detail
   ) 
   set(Boost_USE_STATIC_LIBS ON)
-  find_package(Boost 1.71.0 COMPONENTS ${boost_components})
-  if (NOT Boost_INCLUDE_DIRS)
-    message(STATUS "-- Boost was not found; it will be cloned locally from ${BOOST_BRANCH}.")
-    fetch_boost()
-  else()
+  find_package(Boost COMPONENTS ${boost_components})
+  if (Boost_INCLUDE_DIRS AND Boost_VERSION VERSION_GREATER_EQUAL 1.71.0)
     add_library(boost INTERFACE)
     add_library(Boost::boost ALIAS boost)
     target_include_directories(boost INTERFACE ${Boost_INCLUDE_DIR})
     target_link_directories(boost INTERFACE ${Boost_INCLUDE_DIR}/stage/lib)
+  else()
+    if (NOT BOOST_BRANCH)
+      set(BOOST_BRANCH master)
+    endif()
+    message(STATUS "-- Boost was not found; it will be cloned locally from ${BOOST_BRANCH}.")
+    fetch_boost()
   endif()
 endif()
 
