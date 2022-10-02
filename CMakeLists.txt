@@ -25,7 +25,7 @@ if (BOOST_TEXT_IS_TOP_LEVEL_PROJECT)
     # C++ standard version selection
     ################################################## 
     set(CXX_STD 17 CACHE STRING "Set to 14, 17, etc., to enable C++14, C++17, etc.")
-    set(CMAKE_CXX_STANDARD ${CXX_STD})    
+    set(CMAKE_CXX_STANDARD ${CXX_STD})
 
     ##################################################
     # Sanitizers
@@ -116,7 +116,6 @@ if (TARGET Boost::boost)
         PUBLIC
         Boost::boost)
 endif()
-set_property(TARGET text PROPERTY CXX_STANDARD ${CXX_STD})
 target_compile_options(text PRIVATE -DBOOST_TEXT_SOURCE)
 if (link_flags)
     target_link_libraries(text PUBLIC ${link_flags})
