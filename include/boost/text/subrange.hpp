@@ -34,11 +34,11 @@ namespace boost { namespace text {
 
         [[nodiscard]] constexpr subrange next(std::ptrdiff_t n = 1) const
         {
-            return subrange{std::next(first_, n), last_};
+            return subrange{std::next(first_), last_};
         }
         [[nodiscard]] constexpr subrange prev(std::ptrdiff_t n = 1) const
         {
-            return subrange{std::prev(first_, n), last_};
+            return subrange{std::prev(first_), last_};
         }
 
         constexpr subrange & advance(std::ptrdiff_t n)

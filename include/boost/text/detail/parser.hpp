@@ -56,7 +56,9 @@ namespace boost { namespace text { namespace detail {
     struct scoped_token_iter
     {
         scoped_token_iter(token_iter & it) :
-            it_(it), initial_it_(it), released_(false)
+            it_(it),
+            initial_it_(it),
+            released_(false)
         {}
         ~scoped_token_iter()
         {
@@ -90,7 +92,7 @@ namespace boost { namespace text { namespace detail {
             ++it;
         return retval;
     }
-    inline bool require_impl(token_iter &, token_iter) { return true; }
+    inline bool require_impl(token_iter & it, token_iter end) { return true; }
     template<typename T, typename... Ts>
     inline bool require_impl(token_iter & it, token_iter end, T t, Ts... ts)
     {
@@ -118,8 +120,7 @@ namespace boost { namespace text { namespace detail {
             return {};
         return (it++)->kind();
     }
-    inline optional<std::string>
-    next_identifier(token_iter & it, token_iter end)
+    inline optional<std::string> next_identifier(token_iter & it, token_iter end)
     {
         if (it == end)
             return {};
@@ -398,7 +399,7 @@ namespace boost { namespace text { namespace detail {
                 check_ccc_0_and_append(*range);
             }
 
-            return relation_t{*op, std::move(seq), {}};
+            return relation_t{*op, std::move(seq)};
         } else if (op == token_kind::and_ || op == token_kind::open_bracket) {
             --it;
             return {};

@@ -13,7 +13,6 @@
 #include <boost/text/view_adaptor.hpp>
 #include <boost/text/detail/normalization_data.hpp>
 #include <boost/text/detail/attributes.hpp>
-#include <boost/text/detail/attributes.hpp>
 
 #include <boost/stl_interfaces/view_interface.hpp>
 

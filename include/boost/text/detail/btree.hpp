@@ -33,11 +33,15 @@ namespace boost { namespace text { namespace detail {
     struct node_ptr
     {
         node_ptr() : ptr_() {}
-        explicit node_ptr(node_t<T, Segment> const * node) : ptr_(node) {}
+        explicit node_ptr(node_t<T, Segment> const * node) : ptr_(node)
+        {}
 
         explicit operator bool() const { return ptr_.get(); }
 
-        node_t<T, Segment> const * operator->() const { return ptr_.get(); }
+        node_t<T, Segment> const * operator->() const
+        {
+            return ptr_.get();
+        }
 
         leaf_node_t<T, Segment> const * as_leaf() const;
         interior_node_t<T, Segment> const * as_interior() const;
@@ -48,7 +52,10 @@ namespace boost { namespace text { namespace detail {
 
         void swap(node_ptr & rhs) { ptr_.swap(rhs.ptr_); }
 
-        bool operator==(node_ptr const & rhs) const { return ptr_ == rhs.ptr_; }
+        bool operator==(node_ptr const & rhs) const
+        {
+            return ptr_ == rhs.ptr_;
+        }
 
         leaf_node_t<T, Segment> * as_leaf();
         interior_node_t<T, Segment> * as_interior();
@@ -61,7 +68,9 @@ namespace boost { namespace text { namespace detail {
     struct reference
     {
         reference(
-            node_ptr<T, Segment> const & node, std::size_t lo, std::size_t hi);
+            node_ptr<T, Segment> const & node,
+            std::size_t lo,
+            std::size_t hi);
 
         node_ptr<T, Segment> seg_;
         std::size_t lo_;
@@ -244,7 +253,8 @@ namespace boost { namespace text { namespace detail {
     };
 
     template<typename T, typename Segment>
-    inline leaf_node_t<T, Segment> const * node_ptr<T, Segment>::as_leaf() const
+    inline leaf_node_t<T, Segment> const *
+    node_ptr<T, Segment>::as_leaf() const
     {
         BOOST_ASSERT(ptr_);
         BOOST_ASSERT(ptr_->leaf_);
@@ -281,7 +291,8 @@ namespace boost { namespace text { namespace detail {
     }
 
     template<typename T, typename Segment>
-    inline interior_node_t<T, Segment> * node_ptr<T, Segment>::as_interior()
+    inline interior_node_t<T, Segment> *
+    node_ptr<T, Segment>::as_interior()
     {
         BOOST_ASSERT(ptr_);
         BOOST_ASSERT(!ptr_->leaf_);
@@ -335,7 +346,8 @@ namespace boost { namespace text { namespace detail {
     }
 
     template<typename T, typename Segment>
-    inline children_t<T, Segment> & children(node_ptr<T, Segment> & node)
+    inline children_t<T, Segment> &
+    children(node_ptr<T, Segment> & node)
     {
         return node.as_interior()->children_;
     }
@@ -393,7 +405,8 @@ namespace boost { namespace text { namespace detail {
     }
 
     template<typename T, typename Segment>
-    inline std::size_t offset(node_ptr<T, Segment> const & node, std::size_t i)
+    inline std::size_t
+    offset(node_ptr<T, Segment> const & node, std::size_t i)
     {
         return detail::offset(node.as_interior(), i);
     }
@@ -494,7 +507,9 @@ namespace boost { namespace text { namespace detail {
 
     template<typename T, typename Segment>
     inline reference<T, Segment>::reference(
-        node_ptr<T, Segment> const & seg_node, std::size_t lo, std::size_t hi) :
+        node_ptr<T, Segment> const & seg_node,
+        std::size_t lo,
+        std::size_t hi) :
         seg_(seg_node), lo_(lo), hi_(hi)
     {
         BOOST_ASSERT(seg_node);
@@ -595,7 +610,9 @@ namespace boost { namespace text { namespace detail {
 
     template<typename T, typename Segment>
     inline void bump_along_path_to_leaf(
-        node_ptr<T, Segment> const & node, std::size_t n, std::size_t bump)
+        node_ptr<T, Segment> const & node,
+        std::size_t n,
+        std::size_t bump)
     {
         auto leaf_func = [](node_ptr<T, Segment> const &, std::size_t) {};
         auto int_func = [bump](
@@ -640,8 +657,8 @@ namespace boost { namespace text { namespace detail {
     slice_leaf(node_ptr<T, Segment> node, std::size_t lo, std::size_t hi)
     {
         BOOST_ASSERT(node);
-        BOOST_ASSERT(lo <= detail::size(node.get()));
-        BOOST_ASSERT(hi <= detail::size(node.get()));
+        BOOST_ASSERT(0 <= lo && lo <= detail::size(node.get()));
+        BOOST_ASSERT(0 <= hi && hi <= detail::size(node.get()));
         BOOST_ASSERT(lo < hi);
 
         switch (node.as_leaf()->which_) {
@@ -667,8 +684,8 @@ namespace boost { namespace text { namespace detail {
     erase_leaf(node_ptr<T, Segment> node, std::size_t lo, std::size_t hi)
     {
         BOOST_ASSERT(node);
-        BOOST_ASSERT(lo <= detail::size(node.get()));
-        BOOST_ASSERT(hi <= detail::size(node.get()));
+        BOOST_ASSERT(0 <= lo && lo <= detail::size(node.get()));
+        BOOST_ASSERT(0 <= hi && hi <= detail::size(node.get()));
         BOOST_ASSERT(lo < hi);
 
         auto const leaf_size = detail::size(node.get());
@@ -694,7 +711,7 @@ namespace boost { namespace text { namespace detail {
     inline node_ptr<T, Segment>
     btree_split_child(node_ptr<T, Segment> parent, std::size_t i)
     {
-        BOOST_ASSERT(i < detail::num_children(parent));
+        BOOST_ASSERT(0 <= i && i < detail::num_children(parent));
         BOOST_ASSERT(!detail::full(parent));
         BOOST_ASSERT(
             detail::full(detail::children(parent)[i]) ||
@@ -748,8 +765,8 @@ namespace boost { namespace text { namespace detail {
     inline node_ptr<T, Segment>
     btree_split_leaf(node_ptr<T, Segment> parent, std::size_t i, std::size_t at)
     {
-        BOOST_ASSERT(i < detail::num_children(parent));
-        BOOST_ASSERT(at <= detail::size(parent.get()));
+        BOOST_ASSERT(0 <= i && i < detail::num_children(parent));
+        BOOST_ASSERT(0 <= at && at <= detail::size(parent.get()));
         BOOST_ASSERT(!detail::full(parent));
 
         node_ptr<T, Segment> child = detail::children(parent)[i];
@@ -784,7 +801,7 @@ namespace boost { namespace text { namespace detail {
         node_ptr<T, Segment> && node)
     {
         BOOST_ASSERT(!parent->leaf_);
-        BOOST_ASSERT(at <= detail::size(parent.get()));
+        BOOST_ASSERT(0 <= at && at <= detail::size(parent.get()));
         BOOST_ASSERT(node->leaf_);
 
         std::size_t i = detail::find_child(parent.as_interior(), at);
@@ -831,7 +848,7 @@ namespace boost { namespace text { namespace detail {
     inline node_ptr<T, Segment> btree_insert(
         node_ptr<T, Segment> root, std::size_t at, node_ptr<T, Segment> && node)
     {
-        BOOST_ASSERT(at <= detail::size(root.get()));
+        BOOST_ASSERT(0 <= at && at <= detail::size(root.get()));
         BOOST_ASSERT(node->leaf_);
 
         if (!root) {
@@ -1024,8 +1041,8 @@ namespace boost { namespace text { namespace detail {
     btree_erase(node_ptr<T, Segment> root, std::size_t lo, std::size_t hi)
     {
         BOOST_ASSERT(root);
-        BOOST_ASSERT(lo <= detail::size(root.get()));
-        BOOST_ASSERT(hi <= detail::size(root.get()));
+        BOOST_ASSERT(0 <= lo && lo <= detail::size(root.get()));
+        BOOST_ASSERT(0 <= hi && hi <= detail::size(root.get()));
         BOOST_ASSERT(lo < hi);
 
         BOOST_ASSERT(root);
